@@ -1,1 +1,1 @@
-# Laravel-TrainPlataform
+# Laravel-TrainPlatform
