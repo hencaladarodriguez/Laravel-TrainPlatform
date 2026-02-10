@@ -30,8 +30,10 @@ class AuthController extends Controller
         if ($ciclista) {
             Session::put('ciclista_id', $ciclista->id);
             Session::put('ciclista_nombre', $ciclista->nombre);
+            Session::put('ciclista_email', $ciclista->email);
 
-            return redirect()->action([self::class, 'dashboard']);
+            //Usar nombre de ruta en lugar de action()
+            return redirect()->route('dashboard');
         }
 
         return back()->with('error', 'Credenciales incorrectas');
@@ -41,7 +43,8 @@ class AuthController extends Controller
     public function dashboard()
     {
         if (!Session::has('ciclista_id')) {
-            return redirect()->action([self::class, 'form']);
+            //Usar nombre de ruta
+            return redirect()->route('login')->with('error', 'Debes iniciar sesión');
         }
 
         $menuPath = resource_path('json/menus.json');
@@ -57,6 +60,7 @@ class AuthController extends Controller
     public function logout()
     {
         Session::flush();
-        return redirect()->action([self::class, 'form']);
+        //Usar nombre de ruta
+        return redirect()->route('login')->with('success', 'Sesión cerrada correctamente');
     }
 }
