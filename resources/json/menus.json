@@ -1,0 +1,15 @@
+[
+  {
+    "nombre": "Ciclistas",
+    "submenus": [
+      { "nombre": "Listado", "url": "/ciclistas" },
+      { "nombre": "Nuevo", "url": "/ciclistas/nuevo" }
+    ]
+  },
+  {
+    "nombre": "Planes de entrenamiento",
+    "submenus": [
+      { "nombre": "Listado", "url": "/planes" }
+    ]
+  }
+]
