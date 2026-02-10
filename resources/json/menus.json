@@ -1,15 +1,30 @@
 [
   {
-    "nombre": "Ciclistas",
+    "nombre": "Bloques",
     "submenus": [
-      { "nombre": "Listado", "url": "/ciclistas" },
-      { "nombre": "Nuevo", "url": "/ciclistas/nuevo" }
+      { "nombre": "Listar Bloques", "url": "/bloques" },
+      { "nombre": "Crear Bloque", "url": "/bloque/crear" }
     ]
   },
   {
-    "nombre": "Planes de entrenamiento",
+    "nombre": "Sesiones",
     "submenus": [
-      { "nombre": "Listado", "url": "/planes" }
+      { "nombre": "Listar Sesiones", "url": "/sesiones" },
+      { "nombre": "Crear Sesión", "url": "/sesion/crear" }
+    ]
+  },
+  {
+    "nombre": "Planes",
+    "submenus": [
+      { "nombre": "Listar Planes", "url": "/planes" },
+      { "nombre": "Crear Plan", "url": "/plan/crear" }
+    ]
+  },
+  {
+    "nombre": "Resultados",
+    "submenus": [
+      { "nombre": "Registrar Resultado", "url": "/resultado/crear" },
+      { "nombre": "Consultar Resultados", "url": "/resultados" }
     ]
   }
 ]
