@@ -20,7 +20,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>👁️ Detalles del Plan</h1>
+        <h1> Detalles del Plan</h1>
         
         <div class="plan-info">
             <div class="info-row">

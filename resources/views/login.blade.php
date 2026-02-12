@@ -85,12 +85,7 @@
             background: #3a56d4;
         }
         
-        .login-footer {
-            text-align: center;
-            margin-top: 20px;
-            color: #666;
-            font-size: 14px;
-        }
+
     </style>
 </head>
 <body>
@@ -119,9 +114,6 @@
             <button type="submit">Entrar</button>
         </form>
         
-        <div class="login-footer">
-            Plataforma de Entrenamientos de Ciclismo
-        </div>
     </div>
 </body>
 </html>
