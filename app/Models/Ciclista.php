@@ -2,13 +2,12 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 
-class Ciclista extends Model
+
+class Ciclista extends Authenticatable
 {
     protected $table = 'ciclista';
-
-    public $timestamps = false;
 
     protected $fillable = [
         'nombre',
@@ -17,6 +16,11 @@ class Ciclista extends Model
         'peso_base',
         'altura_base',
         'email',
+        'password'
+    ];
+
+    public $timestamps = false;
+    protected $hidden = [
         'password'
     ];
 

@@ -3,60 +3,69 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use App\Models\Ciclista;
-use Illuminate\Support\Facades\Session;
 
 class AuthController extends Controller
 {
-    // Mostrar formulario de login
-    public function form()
+    /* ========= FORM LOGIN ========= */
+    public function showLogin()
     {
-        return view('login');
+        return view('auth.login');
     }
 
-    // Procesar login
-    public function login(Request $request)
+    /* ========= FORM REGISTER ========= */
+    public function showRegister()
+    {
+        return view('auth.register');
+    }
+
+    /* ========= REGISTER ========= */
+    public function register(Request $request)
     {
         $request->validate([
-            'email' => 'required|email',
-            'password' => 'required'
+            'nombre' => 'required',
+            'email' => 'required|email|unique:ciclista,email',
+            'password' => 'required|min:4'
         ]);
 
-        // Login para práctica sin hash
-        $ciclista = Ciclista::where('email', $request->email)
-            ->where('password', $request->password)
-            ->first();
+        Ciclista::create([
+            'nombre' => $request->nombre,
+            'apellidos' => $request->apellidos,
+            'email' => $request->email,
+            'password' => Hash::make($request->password)
+        ]);
 
-        if ($ciclista) {
-            Session::put('ciclista_id', $ciclista->id);
-            Session::put('ciclista_nombre', $ciclista->nombre);
-
-            return redirect()->action([self::class, 'dashboard']);
-        }
-
-        return back()->with('error', 'Credenciales incorrectas');
+        return redirect()->route('login')
+            ->with('success', 'Usuario creado');
     }
 
-    // Dashboard protegido
-    public function dashboard()
+    /* ========= LOGIN ========= */
+    public function login(Request $request)
     {
-        if (!Session::has('ciclista_id')) {
-            return redirect()->action([self::class, 'form']);
+        $credentials = $request->only('email', 'password');
+
+        if (Auth::attempt($credentials)) {
+
+            $request->session()->regenerate();
+
+            return redirect()->route('dashboard');
         }
 
-        $menuPath = resource_path('json/menus.json');
-        $menus = file_exists($menuPath) ? json_decode(file_get_contents($menuPath), true) : [];
-
-        return view('dashboard', [
-            'nombre' => Session::get('ciclista_nombre'),
-            'menus' => $menus
+        return back()->withErrors([
+            'email' => 'Credenciales incorrectas'
         ]);
     }
 
-    // Logout
-    public function logout()
+    /* ========= LOGOUT ========= */
+    public function logout(Request $request)
     {
-        Session::flush();
-        return redirect()->action([self::class, 'form']);
+        Auth::logout();
+
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect()->route('login');
     }
 }
