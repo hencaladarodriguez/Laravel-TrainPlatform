@@ -1,30 +1,58 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Register</title>
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
 </head>
+
 <body class="auth-body">
 
-<div class="auth-box">
+    <div class="auth-box">
 
-    <h2>Registro</h2>
+        <h2>Registro</h2>
+        <form method="POST" action="{{ route('register.post') }}">
+            @csrf
+            <label>
+                Nombre
+                <input type="text" name="nombre" placeholder="Nombre" required>
+            </label>
 
-    <form method="POST" action="{{ route('register.post') }}">
-        @csrf
+            <label>
+                Apellidos
+                <input type="text" name="apellidos" placeholder="Apellidos">
+            </label>
 
-        <input type="text" name="nombre" placeholder="Nombre" required>
+            <label>
+                Email
+                <input type="email" name="email" placeholder="Email" required>
+            </label>
 
-        <input type="text" name="apellidos" placeholder="Apellidos">
+            <label>
+                Contraseña
+                <input type="password" name="password" placeholder="Password" required>
+            </label>
 
-        <input type="email" name="email" placeholder="Email" required>
+            <label>
+                Fecha de Nacimiento
+                <input type="date" name="fecha_nacimiento" required>
+            </label>
 
-        <input type="password" name="password" placeholder="Password" required>
+            <label>
+                Peso
+                <input type="number" step="0.1" name="peso_base" placeholder="Peso" required>
+            </label>
 
-        <button type="submit">Crear cuenta</button>
-    </form>
+            <label>
+                Altura (Ejemplo: 170)
+                <input type="number" name="altura_base" placeholder="Altura" required>
+            </label>
+            
+            <button type="submit">Crear cuenta</button>
+        </form>
 
-</div>
+    </div>
 
 </body>
+
 </html>

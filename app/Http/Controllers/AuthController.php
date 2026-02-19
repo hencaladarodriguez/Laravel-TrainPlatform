@@ -26,6 +26,10 @@ class AuthController extends Controller
     {
         $request->validate([
             'nombre' => 'required',
+            'apellidos' => 'required',
+            'fecha_nacimiento' => 'required|date',
+            'peso_base' => 'required|numeric',
+            'altura_base' => 'required|numeric',
             'email' => 'required|email|unique:ciclista,email',
             'password' => 'required|min:4'
         ]);
@@ -33,6 +37,9 @@ class AuthController extends Controller
         Ciclista::create([
             'nombre' => $request->nombre,
             'apellidos' => $request->apellidos,
+            'fecha_nacimiento' => $request->fecha_nacimiento,
+            'peso_base' => $request->peso_base,
+            'altura_base' => $request->altura_base,
             'email' => $request->email,
             'password' => Hash::make($request->password)
         ]);
