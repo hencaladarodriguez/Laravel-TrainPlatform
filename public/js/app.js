@@ -1,3 +1,4 @@
+// Configuración de los campos por modelo para cada endpoint
 const camposPorModelo = {
     "/api/sesiones": ["nombre", "fecha", "id_plan", "completada"],
     "/api/planes": [
@@ -61,6 +62,8 @@ window.addEventListener("DOMContentLoaded", () => {
 
 function cargarSeccion(url) {
     const contenido = document.getElementById("contenido");
+    
+    console.log("Cargando sección de URL: ", url);
 
     fetch(url, {
         headers: {
@@ -69,10 +72,13 @@ function cargarSeccion(url) {
         },
     })
         .then((res) => {
+            console.log("Respuesta obtenida: ", res);
             if (!res.ok) throw new Error();
             return res.json();
         })
         .then((data) => {
+            console.log("Datos recibidos: ", data);
+            
             contenido.innerHTML = "";
 
             if (!Array.isArray(data) || !data.length) {
@@ -82,8 +88,7 @@ function cargarSeccion(url) {
 
             if (url.includes("resultados")) renderResultados(data, url);
             else if (url.includes("planes")) renderPlanes(data, url);
-            else if (url.includes("sesion-bloques"))
-                renderSesionBloques(data, url);
+            else if (url.includes("sesion-bloques")) renderSesionBloques(data, url);
             else if (url.includes("sesiones")) renderSesiones(data, url);
             else if (url.includes("bloques")) renderBloques(data, url);
         })
@@ -124,10 +129,81 @@ function renderBloques(data, apiUrl) {
     mostrarTabla(table, apiUrl);
 }
 
+function renderSesionBloques(data, apiUrl) {
+    const headers = ["ID Sesión", "ID Bloque", "Orden", "Repeticiones"];
+    const table = crearTabla(headers);
+
+    data.forEach((sb) => {
+        agregarFila(
+            table,
+            [
+                sb.id_sesion_entrenamiento,
+                sb.id_bloque_entrenamiento,
+                sb.orden,
+                sb.repeticiones,
+            ],
+            sb.id_sesion_entrenamiento,
+            apiUrl,
+        );
+    });
+
+    mostrarTabla(table, apiUrl);
+}
+
+function renderSesiones(data, apiUrl) {
+    const headers = ["ID", "Nombre", "Fecha", "ID Plan", "Completada"];
+    const table = crearTabla(headers);
+
+    data.forEach((s) => {
+        agregarFila(
+            table,
+            [s.id, s.nombre, s.fecha, s.id_plan, s.completada],
+            s.id,
+            apiUrl,
+        );
+    });
+
+    mostrarTabla(table, apiUrl);
+}
+
+function renderPlanes(data, apiUrl) {
+    const headers = ["ID", "Nombre", "Descripción", "Fecha Inicio", "Fecha Fin"];
+    const table = crearTabla(headers);
+
+    data.forEach((p) => {
+        agregarFila(
+            table,
+            [p.id, p.nombre, p.descripcion, p.fecha_inicio, p.fecha_fin],
+            p.id,
+            apiUrl,
+        );
+    });
+
+    mostrarTabla(table, apiUrl);
+}
+
+function renderResultados(data, apiUrl) {
+    const headers = [
+        "Fecha", "Duración", "Kilómetros", "Recorrido", "Pulso Medio", "Comentario"
+    ];
+    const table = crearTabla(headers);
+
+    data.forEach((r) => {
+        agregarFila(
+            table,
+            [r.fecha, r.duracion, r.kilometros, r.recorrido, r.pulso_medio, r.comentario],
+            r.id,
+            apiUrl,
+        );
+    });
+
+    mostrarTabla(table, apiUrl);
+}
+
 // ===================== CRUD =====================
 
 function mostrarFormularioCrear(apiUrl) {
-    pintarFormulario({}, apiUrl, null);
+    pintarFormulario({}, apiUrl, null); // Mostrar el formulario vacío para crear un nuevo registro
 }
 
 function pintarFormulario(data, apiUrl, id = null) {
@@ -155,45 +231,10 @@ function pintarFormulario(data, apiUrl, id = null) {
         const input = document.createElement("input");
         input.name = key;
 
-        // Para el campo 'tipo', que es ENUM
-        if (key === "tipo") {
-            const select = document.createElement("select");
-            select.name = key;
-            select.required = true;
-
-            const opciones = ["rodaje", "intervalos", "fuerza", "recuperacion", "test"];
-            opciones.forEach((opcion) => {
-                const option = document.createElement("option");
-                option.value = opcion;
-                option.textContent = opcion.charAt(0).toUpperCase() + opcion.slice(1);
-                if (data[key] === opcion) option.selected = true;
-                select.appendChild(option);
-            });
-
-            form.append(label, select);
-        } else if (key === "velocidad") {
-            // Para 'velocidad', otro campo ENUM
-            const select = document.createElement("select");
-            select.name = key;
-            select.required = true;
-
-            const opciones = ["9v", "10v", "11v", "12v"];
-            opciones.forEach((opcion) => {
-                const option = document.createElement("option");
-                option.value = opcion;
-                option.textContent = opcion;
-                if (data[key] === opcion) option.selected = true;
-                select.appendChild(option);
-            });
-
-            form.append(label, select);
-        } else if (key.includes("fecha")) {
-            input.type = "date";
-        } else if (key.includes("completada") || key.includes("activo")) {
+        // Lógica para campos especiales (fecha, checkbox, select, etc.)
+        if (key === "completada" || key === "activo") {
             input.type = "checkbox";
             input.checked = data[key] == 1;
-        } else if (key.startsWith("id_")) {
-            input.type = "number";
         } else {
             input.type = "text";
         }
@@ -203,7 +244,7 @@ function pintarFormulario(data, apiUrl, id = null) {
     });
 
     const btn = document.createElement("button");
-    btn.textContent = id ? "Actualizar" : "Crear";
+    btn.textContent = id ? "Actualizar" : "Crear"; // "Actualizar" si es edición, "Crear" si es nuevo
     btn.type = "submit";
     form.appendChild(btn);
 
@@ -222,8 +263,9 @@ function pintarFormulario(data, apiUrl, id = null) {
             }
         });
 
+        // Aquí hacemos el POST para añadir el nuevo elemento
         fetch(id ? `${apiUrl}/${id}` : apiUrl, {
-            method: id ? "PUT" : "POST",
+            method: id ? "PUT" : "POST",  // PUT si es actualización, POST si es nuevo
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(objeto),
         })
@@ -237,11 +279,7 @@ function pintarFormulario(data, apiUrl, id = null) {
 
                 return JSON.parse(text);
             })
-            .then((res) => {
-                if (!res.ok) throw new Error();
-                return res.json();
-            })
-            .then(() => cargarSeccion(endpoint))
+            .then(() => cargarSeccion(apiUrl)) // Recargar la sección después de la acción
             .catch(async (error) => {
                 console.error(error);
                 alert("Error al guardar. Mira la consola.");
@@ -249,4 +287,73 @@ function pintarFormulario(data, apiUrl, id = null) {
     };
 
     contenido.appendChild(form);
+}
+
+function mostrarTabla(table, apiUrl) {
+    const contenido = document.getElementById("contenido");
+    contenido.appendChild(table);
+
+    const btnCrear = document.createElement("button");
+    btnCrear.textContent = "Crear Nuevo";
+    btnCrear.onclick = () => mostrarFormularioCrear(apiUrl);
+    contenido.appendChild(btnCrear);
+}
+
+// ===================== TABLA =====================
+
+function crearTabla(headers) {
+    const table = document.createElement("table");
+    const thead = document.createElement("thead");
+    const tr = document.createElement("tr");
+
+    headers.forEach((header) => {
+        const th = document.createElement("th");
+        th.textContent = header;
+        tr.appendChild(th);
+    });
+
+    thead.appendChild(tr);
+    table.appendChild(thead);
+    table.appendChild(document.createElement("tbody"));
+    return table;
+}
+
+function agregarFila(table, rowData, id, apiUrl) {
+    const tbody = table.querySelector("tbody");
+    const tr = document.createElement("tr");
+
+    rowData.forEach((data) => {
+        const td = document.createElement("td");
+        td.textContent = data;
+        tr.appendChild(td);
+    });
+
+    // Opcional: Agregar botones para editar o eliminar
+    const tdAcciones = document.createElement("td");
+    const btnEditar = document.createElement("button");
+    btnEditar.textContent = "Editar";
+    btnEditar.onclick = () => {
+        pintarFormulario(rowData, apiUrl, id);
+    };
+    tdAcciones.appendChild(btnEditar);
+
+    const btnEliminar = document.createElement("button");
+    btnEliminar.textContent = "Eliminar";
+    btnEliminar.onclick = () => {
+        eliminarElemento(id, apiUrl);
+    };
+    tdAcciones.appendChild(btnEliminar);
+
+    tr.appendChild(tdAcciones);
+    tbody.appendChild(tr);
+}
+
+function eliminarElemento(id, apiUrl) {
+    if (confirm("¿Estás seguro de que deseas eliminar este registro?")) {
+        fetch(`${apiUrl}/${id}`, {
+            method: "DELETE",
+        })
+            .then(() => cargarSeccion(apiUrl))
+            .catch(() => alert("Error al eliminar el registro"));
+    }
 }
