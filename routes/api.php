@@ -7,10 +7,6 @@ use App\Http\Controllers\Api\SesionEntrenamientoController;
 use App\Http\Controllers\Api\PlanEntrenamientoController;
 use App\Http\Controllers\Api\ResultadoController;
 
-/*
-API Routes
-*/
-
 Route::apiResource('bloques', BloqueEntrenamientoController::class);
 Route::apiResource('sesion-bloques', SesionBloqueController::class);
 Route::apiResource('sesiones', SesionEntrenamientoController::class);

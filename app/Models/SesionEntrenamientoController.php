@@ -22,8 +22,16 @@ class SesionEntrenamientoController extends Controller
 
     public function store(Request $request)
     {
-        SesionEntrenamiento::create($request->all());
-        return redirect()->route('sesiones.index');
+        $sesion = SesionEntrenamiento::create($request->all());
+        return response()->json($sesion);
+    }
+    
+    public function update(Request $request, $id)
+    {
+        $sesion = SesionEntrenamiento::findOrFail($id);
+        $sesion->update($request->all());
+
+        return response()->json($sesion);
     }
 
     public function destroy($id)

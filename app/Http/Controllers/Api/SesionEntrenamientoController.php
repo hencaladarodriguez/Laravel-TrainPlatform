@@ -28,9 +28,42 @@ class SesionEntrenamientoController extends Controller
 
     public function store(Request $request)
     {
-        $sesion = SesionEntrenamiento::create($request->all());
+        $validated = $request->validate([
+            'id_plan' => 'required|exists:plan_entrenamiento,id',
+            'fecha' => 'required|date',
+            'nombre' => 'required|string|max:255',
+            'descripcion' => 'nullable|string',
+            'completada' => 'required'
+        ]);
+
+        $validated['completada'] = filter_var($request->completada, FILTER_VALIDATE_BOOLEAN);
+
+        $sesion = SesionEntrenamiento::create($validated);
 
         return response()->json($sesion, 201);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $sesion = SesionEntrenamiento::find($id);
+
+        if (!$sesion) {
+            return response()->json(['error' => 'No encontrada'], 404);
+        }
+
+        $validated = $request->validate([
+            'id_plan' => 'required|exists:plan_entrenamiento,id',
+            'fecha' => 'required|date',
+            'nombre' => 'required|string|max:255',
+            'descripcion' => 'nullable|string',
+            'completada' => 'required'
+        ]);
+
+        $validated['completada'] = filter_var($request->completada, FILTER_VALIDATE_BOOLEAN);
+
+        $sesion->update($validated);
+
+        return response()->json($sesion);
     }
 
     public function destroy($id)

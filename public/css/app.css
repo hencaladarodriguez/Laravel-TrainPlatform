@@ -1,60 +1,174 @@
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f5f5f5;
-    color: #333;
-    margin: 0;
-    padding: 0;
+/* ===================== RESET BÁSICO ===================== */
+
+* {
+    box-sizing: border-box;
 }
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f4f6f9;
+    color: #222;
+}
+
+/* ===================== NAVBAR ===================== */
 
 .navbar {
-    background-color: #444;
-    color: #fff;
-    padding: 10px 20px;
-}
-
-.navbar .logo {
-    display: inline-block;
-    font-size: 1.5em;
-    font-weight: bold;
+    background-color: #1e1e2f;
+    padding: 15px 30px;
 }
 
 .nav-links {
     list-style: none;
-    display: inline-block;
-    margin-left: 20px;
+    display: flex;
+    gap: 25px;
+    margin: 0;
     padding: 0;
 }
 
-.nav-links li {
-    display: inline;
-    margin-right: 15px;
-}
-
 .nav-links a {
-    color: #fff;
+    color: #cfcfcf;
     text-decoration: none;
+    font-weight: 500;
+    transition: 0.2s ease;
 }
 
 .nav-links a:hover {
-    text-decoration: underline;
+    color: #ffffff;
 }
+
+/* ===================== CONTENIDO ===================== */
 
 .container {
-    padding: 20px;
+    padding: 40px;
 }
 
-.tabla {
+#contenido {
+    margin-top: 20px;
+}
+
+/* ===================== TABLAS ===================== */
+
+table {
     width: 100%;
     border-collapse: collapse;
+    background-color: #ffffff;
+    border-radius: 6px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
 }
 
-.tabla th, .tabla td {
-    border: 1px solid #999;
-    padding: 8px;
+thead {
+    background-color: #2c2c3e;
+    color: white;
+}
+
+th {
+    padding: 12px;
     text-align: left;
+    font-size: 14px;
+    letter-spacing: 0.5px;
 }
 
-.tabla th {
-    background-color: #666;
-    color: #fff;
+td {
+    padding: 12px;
+    border-bottom: 1px solid #e6e6e6;
+    font-size: 14px;
+}
+
+tbody tr:hover {
+    background-color: #f7f8fb;
+}
+
+tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* ===================== BOTONES ===================== */
+
+button {
+    padding: 7px 14px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: 0.2s ease;
+}
+
+button:hover {
+    opacity: 0.85;
+}
+
+/* Botón Añadir */
+.btn-add {
+    background-color: #2c2c3e;
+    color: white;
+    margin-bottom: 15px;
+}
+
+/* Editar */
+button:not(.btn-add):not(.btn-eliminar) {
+    background-color: #4a4a6a;
+    color: white;
+}
+
+/* Eliminar */
+.btn-eliminar {
+    background-color: #b33a3a;
+    color: white;
+}
+
+/* ===================== FORMULARIO ===================== */
+
+form {
+    background-color: white;
+    padding: 25px;
+    max-width: 500px;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #555;
+}
+
+input[type="text"],
+input[type="number"],
+input[type="date"] {
+    padding: 8px 10px;
+    border: 1px solid #dcdcdc;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: 0.2s ease;
+}
+
+input:focus {
+    outline: none;
+    border-color: #4a4a6a;
+}
+
+/* Checkbox alineado */
+input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    margin-top: 5px;
+}
+
+/* Botón submit del formulario */
+form button {
+    background-color: #2c2c3e;
+    color: white;
+    margin-top: 10px;
+}
+
+/* ===================== MENSAJES ===================== */
+
+p {
+    font-size: 14px;
+    color: #666;
 }
