@@ -7,13 +7,12 @@ use App\Http\Controllers\Api\SesionEntrenamientoController;
 use App\Http\Controllers\Api\PlanEntrenamientoController;
 use App\Http\Controllers\Api\ResultadoController;
 
+/*
+API Routes
+*/
 
-    Route::get('/bloques', [BloqueEntrenamientoController::class, 'index']);
-    Route::post('/bloques/crear', [BloqueEntrenamientoController::class, 'store']);
-    Route::get('/bloques/{id}', [BloqueEntrenamientoController::class, 'show']);
-    Route::delete('/bloques/{id}/eliminar', [BloqueEntrenamientoController::class, 'destroy']);
-
-    Route::get('/sesion-bloques', [SesionBloqueController::class, 'index']);
-    Route::get('/sesiones', [SesionEntrenamientoController::class, 'index']);
-    Route::get('/planes', [PlanEntrenamientoController::class, 'index']);
-    Route::get('/resultados', [ResultadoController::class, 'index']);
+Route::apiResource('bloques', BloqueEntrenamientoController::class);
+Route::apiResource('sesion-bloques', SesionBloqueController::class);
+Route::apiResource('sesiones', SesionEntrenamientoController::class);
+Route::apiResource('planes', PlanEntrenamientoController::class);
+Route::apiResource('resultados', ResultadoController::class);

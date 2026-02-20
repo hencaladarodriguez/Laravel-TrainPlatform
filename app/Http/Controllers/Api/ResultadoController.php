@@ -1,37 +1,43 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
-use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 use App\Models\Entrenamiento;
+use Illuminate\Http\Request;
 
 class ResultadoController extends Controller
 {
     public function index()
     {
-        $resultados = Entrenamiento::with([
-            'ciclista',
-            'sesion',
-            'bicicleta'
-        ])->get();
-
-        return view('resultados.index', compact('resultados'));
-    }
-
-    public function create()
-    {
-        return view('resultados.create');
-    }
-
-    public function store(Request $request)
-    {
-        Entrenamiento::create($request->all());
-        return redirect()->route('resultados.index');
+        return response()->json(
+            Entrenamiento::with([
+                'ciclista',
+                'sesion',
+                'bicicleta'
+            ])->get()
+        );
     }
 
     public function show($id)
     {
-        $resultado = Entrenamiento::findOrFail($id);
-        return view('resultados.show', compact('resultado'));
+        $resultado = Entrenamiento::with([
+            'ciclista',
+            'sesion',
+            'bicicleta'
+        ])->find($id);
+
+        if (!$resultado) {
+            return response()->json(['error' => 'No encontrado'], 404);
+        }
+
+        return response()->json($resultado);
+    }
+
+    public function store(Request $request)
+    {
+        $resultado = Entrenamiento::create($request->all());
+
+        return response()->json($resultado, 201);
     }
 }

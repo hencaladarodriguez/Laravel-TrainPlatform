@@ -10,16 +10,17 @@ class BloqueEntrenamientoController extends Controller
 {
     public function index()
     {
-        $bloques = BloqueEntrenamiento::all();
-        return response()->json($bloques);
+        return response()->json(BloqueEntrenamiento::all());
     }
 
     public function show($id)
     {
         $bloque = BloqueEntrenamiento::find($id);
+
         if (!$bloque) {
             return response()->json(['error' => 'Bloque no encontrado'], 404);
         }
+
         return response()->json($bloque);
     }
 
@@ -38,16 +39,33 @@ class BloqueEntrenamientoController extends Controller
         ]);
 
         $bloque = BloqueEntrenamiento::create($validated);
+
         return response()->json($bloque, 201);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $bloque = BloqueEntrenamiento::find($id);
+
+        if (!$bloque) {
+            return response()->json(['error' => 'Bloque no encontrado'], 404);
+        }
+
+        $bloque->update($request->all());
+
+        return response()->json($bloque);
     }
 
     public function destroy($id)
     {
         $bloque = BloqueEntrenamiento::find($id);
+
         if (!$bloque) {
             return response()->json(['error' => 'Bloque no encontrado'], 404);
         }
+
         $bloque->delete();
-        return response()->json(null, 204);
+
+        return response()->json(['message' => 'Eliminado correctamente']);
     }
 }

@@ -1,34 +1,48 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
-use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 use App\Models\SesionEntrenamiento;
-use App\Models\PlanEntrenamiento;
+use Illuminate\Http\Request;
 
 class SesionEntrenamientoController extends Controller
 {
     public function index()
     {
-        $sesiones = SesionEntrenamiento::with('plan')->get();
-        return view('sesiones.index', compact('sesiones'));
+        return response()->json(
+            SesionEntrenamiento::with('plan')->get()
+        );
     }
 
-    public function create()
+    public function show($id)
     {
-        $planes = PlanEntrenamiento::all();
-        return view('sesiones.create', compact('planes'));
+        $sesion = SesionEntrenamiento::with('plan')->find($id);
+
+        if (!$sesion) {
+            return response()->json(['error' => 'No encontrada'], 404);
+        }
+
+        return response()->json($sesion);
     }
 
     public function store(Request $request)
     {
-        SesionEntrenamiento::create($request->all());
-        return redirect()->route('sesiones.index');
+        $sesion = SesionEntrenamiento::create($request->all());
+
+        return response()->json($sesion, 201);
     }
 
     public function destroy($id)
     {
-        SesionEntrenamiento::destroy($id);
-        return redirect()->route('sesiones.index');
+        $sesion = SesionEntrenamiento::find($id);
+
+        if (!$sesion) {
+            return response()->json(['error' => 'No encontrada'], 404);
+        }
+
+        $sesion->delete();
+
+        return response()->json(['message' => 'Eliminada']);
     }
 }

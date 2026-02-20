@@ -3,46 +3,57 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\SesionBloque;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Request;
 
 class SesionBloqueController extends Controller
 {
     public function index()
     {
-        $sesionBloques = DB::table('sesion_bloque')->get();
-        return view('sesionBloques.index', compact('sesionBloques'));
+        return response()->json(SesionBloque::all());
     }
 
-    public function create()
+    public function show($id)
     {
-        return view('sesionBloques.create');
+        $sesionBloque = SesionBloque::find($id);
+
+        if (!$sesionBloque) {
+            return response()->json(['error' => 'No encontrado'], 404);
+        }
+
+        return response()->json($sesionBloque);
     }
 
     public function store(Request $request)
     {
-        SesionBloque::create($request->all());
-        return redirect()->route('sesionBloques.index');
-    }
+        $sesionBloque = SesionBloque::create($request->all());
 
-    public function edit($id)
-    {
-        $sesionBloque = SesionBloque::findOrFail($id);
-        return view('sesionBloques.edit', compact('sesionBloque'));
+        return response()->json($sesionBloque, 201);
     }
 
     public function update(Request $request, $id)
     {
-        $sesionBloque = SesionBloque::findOrFail($id);
+        $sesionBloque = SesionBloque::find($id);
+
+        if (!$sesionBloque) {
+            return response()->json(['error' => 'No encontrado'], 404);
+        }
+
         $sesionBloque->update($request->all());
 
-        return redirect()->route('sesionBloques.index');
+        return response()->json($sesionBloque);
     }
 
     public function destroy($id)
     {
-        SesionBloque::destroy($id);
-        return redirect()->route('sesionBloques.index');
+        $sesionBloque = SesionBloque::find($id);
+
+        if (!$sesionBloque) {
+            return response()->json(['error' => 'No encontrado'], 404);
+        }
+
+        $sesionBloque->delete();
+
+        return response()->json(['message' => 'Eliminado']);
     }
 }

@@ -1,50 +1,48 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
-use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 use App\Models\PlanEntrenamiento;
-use App\Models\Ciclista;
+use Illuminate\Http\Request;
 
 class PlanEntrenamientoController extends Controller
 {
     public function index()
     {
-        $planes = PlanEntrenamiento::with('ciclista')->get();
-        return view('planes.index', compact('planes'));
+        return response()->json(
+            PlanEntrenamiento::with('ciclista')->get()
+        );
     }
 
-    public function create()
+    public function show($id)
     {
-        $ciclistas = Ciclista::all();
-        return view('planes.create', compact('ciclistas'));
+        $plan = PlanEntrenamiento::with('ciclista')->find($id);
+
+        if (!$plan) {
+            return response()->json(['error' => 'No encontrado'], 404);
+        }
+
+        return response()->json($plan);
     }
 
     public function store(Request $request)
     {
-        PlanEntrenamiento::create($request->all());
-        return redirect()->route('planes.index');
-    }
+        $plan = PlanEntrenamiento::create($request->all());
 
-    public function edit($id)
-    {
-        $plan = PlanEntrenamiento::findOrFail($id);
-        $ciclistas = Ciclista::all();
-
-        return view('planes.edit', compact('plan','ciclistas'));
-    }
-
-    public function update(Request $request, $id)
-    {
-        $plan = PlanEntrenamiento::findOrFail($id);
-        $plan->update($request->all());
-
-        return redirect()->route('planes.index');
+        return response()->json($plan, 201);
     }
 
     public function destroy($id)
     {
-        PlanEntrenamiento::destroy($id);
-        return redirect()->route('planes.index');
+        $plan = PlanEntrenamiento::find($id);
+
+        if (!$plan) {
+            return response()->json(['error' => 'No encontrado'], 404);
+        }
+
+        $plan->delete();
+
+        return response()->json(['message' => 'Eliminado']);
     }
 }
