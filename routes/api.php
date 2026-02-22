@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\PlanEntrenamientoController;
 use App\Http\Controllers\Api\ResultadoController;
 
 Route::post('/login', [AuthController::class, 'loginApi']);
+Route::post('/register', [AuthController::class, 'register']);
 
 Route::middleware('auth:sanctum')->group(function () {
 

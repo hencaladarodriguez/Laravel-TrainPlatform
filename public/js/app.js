@@ -41,11 +41,9 @@ const FORM_SCHEMAS = {
     ],
 };
 
-
 const API_BASE = "http://localhost:8000";
 
 // Token
-
 function setToken(token) {
     localStorage.setItem("token", token);
 }
@@ -59,7 +57,6 @@ function removeToken() {
 }
 
 // Fetch Central
-
 function apiFetch(url, options = {}) {
     const token = getToken();
 
@@ -95,7 +92,6 @@ function apiFetch(url, options = {}) {
 }
 
 // Login
-
 function initLogin() {
     const form = document.querySelector("#loginForm");
     if (!form) return;
@@ -129,8 +125,46 @@ function initLogin() {
     });
 }
 
-// Dashboard
+function initRegister() {
+    const form = document.querySelector("#registerForm");
+    if (!form) return;
 
+    form.addEventListener("submit", function (e) {
+        e.preventDefault();
+
+        const formData = new FormData(form);
+        const formObject = {};
+
+        formData.forEach((value, key) => {
+            formObject[key] = value;
+        });
+
+        fetch(API_BASE + "/api/register", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Accept: "application/json",
+            },
+            body: JSON.stringify(formObject),
+        })
+            .then((res) => res.json())
+            .then((data) => {
+                if (data.success) {
+                    alert(data.message); // Muestra el mensaje de éxito
+                    // Redirigir a la página de login
+                    window.location.href = data.redirect_to;
+                } else {
+                    alert("Hubo un error al crear la cuenta. Intenta nuevamente.");
+                }
+            })
+            .catch((err) => {
+                console.error("Error:", err);
+                alert("Error al crear la cuenta.");
+            });
+    });
+}
+
+// Dashboard
 function initDashboard() {
     if (!document.getElementById("contenido")) return;
 
@@ -157,7 +191,6 @@ function initDashboard() {
 }
 
 // Cargar Sección
-
 function cargarSeccion(url) {
     const contenido = document.getElementById("contenido");
 
@@ -187,7 +220,6 @@ function cargarSeccion(url) {
 }
 
 // Cargar Tabla
-
 function renderTabla(data, apiUrl) {
     const contenido = document.getElementById("contenido");
 
@@ -249,7 +281,6 @@ function renderTabla(data, apiUrl) {
 }
 
 // Formulario
-
 function mostrarFormulario(apiUrl, data = null) {
     const contenido = document.getElementById("contenido");
     contenido.innerHTML = "";
@@ -320,7 +351,6 @@ function mostrarFormulario(apiUrl, data = null) {
 }
 
 // Eliminar
-
 function eliminarRegistro(apiUrl, id) {
     if (!confirm("¿Seguro que quieres eliminar?")) return;
 
@@ -335,7 +365,6 @@ function eliminarRegistro(apiUrl, id) {
 }
 
 // Logout
-
 function logout() {
     apiFetch("/api/logout", { method: "POST" }).finally(() => {
         removeToken();
@@ -344,9 +373,9 @@ function logout() {
 }
 
 // Init Global
-
 document.addEventListener("DOMContentLoaded", function () {
     initLogin();
+    initRegister(); // Llamada a la función de registro
     initDashboard();
 });
 

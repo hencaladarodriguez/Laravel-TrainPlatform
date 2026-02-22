@@ -31,7 +31,7 @@ class AuthController extends Controller
             'password' => 'required|min:4'
         ]);
 
-        Ciclista::create([
+        $ciclista = Ciclista::create([
             'nombre' => $request->nombre,
             'apellidos' => $request->apellidos,
             'fecha_nacimiento' => $request->fecha_nacimiento,
@@ -41,8 +41,12 @@ class AuthController extends Controller
             'password' => Hash::make($request->password)
         ]);
 
-        return redirect()->route('login')
-            ->with('success', 'Usuario creado');
+        return response()->json([
+        'success' => true,
+        'message' => 'Usuario creado correctamente. Redirigiendo al login...',
+        'redirect_to' => route('login') 
+        ]);
+
     }
 
     public function login(Request $request)
