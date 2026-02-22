@@ -9,7 +9,8 @@ class PlanSeeder extends Seeder
 {
     public function run()
     {
-        PlanEntrenamiento::query()->delete(); // Limpiar tabla antes de insertar
+        // Limpiar tabla
+        PlanEntrenamiento::query()->delete();
 
         PlanEntrenamiento::create([
             'id_ciclista' => 1,

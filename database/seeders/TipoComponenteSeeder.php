@@ -9,7 +9,8 @@ class TipoComponenteSeeder extends Seeder
 {
     public function run()
     {
-        TipoComponente::query()->delete(); // limpiar la tabla
+        // limpiar la tabla
+        TipoComponente::query()->delete(); 
 
         TipoComponente::create(['nombre' => 'Cambio', 'descripcion' => 'Sistema de cambio de marchas']);
         TipoComponente::create(['nombre' => 'Rueda', 'descripcion' => 'Rueda y llanta']);

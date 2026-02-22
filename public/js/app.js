@@ -40,11 +40,10 @@ const FORM_SCHEMAS = {
     ],
 };
 
-// ===================== CONFIG =====================
 
 const API_BASE = "http://localhost:8000";
 
-// ===================== TOKEN =====================
+// Token
 
 function setToken(token) {
     localStorage.setItem("token", token);
@@ -58,7 +57,7 @@ function removeToken() {
     localStorage.removeItem("token");
 }
 
-// ===================== FETCH CENTRAL =====================
+// Fetch Central
 
 function apiFetch(url, options = {}) {
     const token = getToken();
@@ -94,7 +93,7 @@ function apiFetch(url, options = {}) {
     });
 }
 
-// ===================== LOGIN =====================
+// Login
 
 function initLogin() {
     const form = document.querySelector("#loginForm");
@@ -129,7 +128,7 @@ function initLogin() {
     });
 }
 
-// ===================== DASHBOARD =====================
+// Dashboard
 
 function initDashboard() {
     if (!document.getElementById("contenido")) return;
@@ -156,7 +155,7 @@ function initDashboard() {
     });
 }
 
-// ===================== CARGAR SECCIÓN =====================
+// Cargar Sección
 
 function cargarSeccion(url) {
     const contenido = document.getElementById("contenido");
@@ -186,7 +185,7 @@ function cargarSeccion(url) {
         });
 }
 
-// ===================== RENDER TABLA =====================
+// Cargar Tabla
 
 function renderTabla(data, apiUrl) {
     const contenido = document.getElementById("contenido");
@@ -248,7 +247,7 @@ function renderTabla(data, apiUrl) {
     contenido.appendChild(btnCrear);
 }
 
-// ===================== FORMULARIO =====================
+// Formulario
 
 function mostrarFormulario(apiUrl, data = null) {
     const contenido = document.getElementById("contenido");
@@ -319,7 +318,7 @@ function mostrarFormulario(apiUrl, data = null) {
     contenido.appendChild(form);
 }
 
-// ===================== ELIMINAR =====================
+// Eliminar
 
 function eliminarRegistro(apiUrl, id) {
     if (!confirm("¿Seguro que quieres eliminar?")) return;
@@ -334,7 +333,7 @@ function eliminarRegistro(apiUrl, id) {
         });
 }
 
-// ===================== LOGOUT =====================
+// Logout
 
 function logout() {
     apiFetch("/api/logout", { method: "POST" }).finally(() => {
@@ -343,7 +342,7 @@ function logout() {
     });
 }
 
-// ===================== INIT GLOBAL =====================
+// Init Global
 
 document.addEventListener("DOMContentLoaded", function () {
     initLogin();

@@ -14,7 +14,7 @@ class EntrenamientoSeeder extends Seeder
         Entrenamiento::create([
             'id_ciclista' => 1,
             'id_bicicleta' => 1,
-            'id_sesion' => 1, // opcional pero lo ponemos
+            'id_sesion' => 1,
 
             'fecha' => '2026-01-01 07:30:00',
             'duracion' => '01:45:00',

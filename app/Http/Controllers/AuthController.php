@@ -9,19 +9,16 @@ use App\Models\Ciclista;
 
 class AuthController extends Controller
 {
-    /* ========= FORM LOGIN ========= */
     public function showLogin()
     {
         return view('auth.login');
     }
 
-    /* ========= FORM REGISTER ========= */
     public function showRegister()
     {
         return view('auth.register');
     }
 
-    /* ========= REGISTER WEB ========= */
     public function register(Request $request)
     {
         $request->validate([
@@ -48,7 +45,6 @@ class AuthController extends Controller
             ->with('success', 'Usuario creado');
     }
 
-    /* ========= LOGIN WEB ========= */
     public function login(Request $request)
     {
         $credentials = $request->only('email', 'password');
@@ -63,7 +59,6 @@ class AuthController extends Controller
         ]);
     }
 
-    /* ========= LOGIN API (TOKEN) ========= */
     public function loginApi(Request $request)
     {
         $request->validate([
@@ -87,7 +82,6 @@ class AuthController extends Controller
         ]);
     }
 
-    /* ========= LOGOUT WEB ========= */
     public function logout(Request $request)
     {
         Auth::logout();
@@ -97,7 +91,6 @@ class AuthController extends Controller
         return redirect()->route('login');
     }
 
-    /* ========= LOGOUT API ========= */
     public function logoutApi(Request $request)
     {
         $request->user()->currentAccessToken()->delete();

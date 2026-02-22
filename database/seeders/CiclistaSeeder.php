@@ -10,7 +10,8 @@ class CiclistaSeeder extends Seeder
 {
     public function run()
     {
-        Ciclista::query()->delete(); // Limpiar tabla antes de insertar
+        // Limpiar tabla antes de insertar
+        Ciclista::query()->delete(); 
 
         Ciclista::create([
             'nombre' => 'Juan',
