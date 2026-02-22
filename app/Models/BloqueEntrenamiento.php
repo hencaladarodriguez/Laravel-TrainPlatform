@@ -12,6 +12,7 @@ class BloqueEntrenamiento extends Model
     protected $table = 'bloque_entrenamiento';
 
     protected $fillable = [
+        'id_ciclista',
         'nombre',
         'descripcion',
         'tipo',

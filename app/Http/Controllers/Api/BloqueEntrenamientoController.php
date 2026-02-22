@@ -10,21 +10,18 @@ class BloqueEntrenamientoController extends Controller
 {
     public function index()
     {
-        $ciclistaId = auth()->id();
-
-        $bloques = BloqueEntrenamiento::whereHas('sesiones.plan', function ($query) use ($ciclistaId) {
-            $query->where('id_ciclista', $ciclistaId);
-        })->get();
-
-        return response()->json($bloques);
+        return response()->json(
+            BloqueEntrenamiento::where('id_ciclista', auth()->id())->get()
+        );
     }
 
     public function show($id)
     {
-        $bloque = BloqueEntrenamiento::find($id);
+        $bloque = BloqueEntrenamiento::where('id_ciclista', auth()->id())
+                                    ->find($id);
 
         if (!$bloque) {
-            return response()->json(['error' => 'Bloque no encontrado'], 404);
+            return response()->json(['error' => 'No autorizado'], 404);
         }
 
         return response()->json($bloque);
@@ -35,16 +32,16 @@ class BloqueEntrenamientoController extends Controller
         $validated = $request->validate([
             'nombre' => 'required|string|max:255',
             'descripcion' => 'nullable|string',
-            'tipo' => 'required|string|max:50',
+            'tipo' => 'required|string|max:100',
             'duracion_estimada' => 'nullable|string',
             'potencia_pct_min' => 'nullable|numeric',
             'potencia_pct_max' => 'nullable|numeric',
             'pulso_pct_max' => 'nullable|numeric',
             'pulso_reserva_pct' => 'nullable|numeric',
-            'comentario' => 'nullable|string',
+            'comentario' => 'nullable|string'
         ]);
 
-        $validated['id_ciclista'] = auth()->user()->id;
+        $validated['id_ciclista'] = auth()->id();
 
         $bloque = BloqueEntrenamiento::create($validated);
 
@@ -53,22 +50,22 @@ class BloqueEntrenamientoController extends Controller
 
     public function update(Request $request, $id)
     {
-        $bloque = BloqueEntrenamiento::find($id);
+        $bloque = BloqueEntrenamiento::where('id_ciclista', auth()->id())->find($id);
 
         if (!$bloque) {
-            return response()->json(['error' => 'Bloque no encontrado'], 404);
+            return response()->json(['error' => 'No autorizado'], 404);
         }
 
         $validated = $request->validate([
             'nombre' => 'required|string|max:255',
             'descripcion' => 'nullable|string',
-            'tipo' => 'required|string|max:50',
+            'tipo' => 'required|string|max:100',
             'duracion_estimada' => 'nullable|string',
             'potencia_pct_min' => 'nullable|numeric',
             'potencia_pct_max' => 'nullable|numeric',
             'pulso_pct_max' => 'nullable|numeric',
             'pulso_reserva_pct' => 'nullable|numeric',
-            'comentario' => 'nullable|string',
+            'comentario' => 'nullable|string'
         ]);
 
         $bloque->update($validated);
@@ -78,14 +75,14 @@ class BloqueEntrenamientoController extends Controller
 
     public function destroy($id)
     {
-        $bloque = BloqueEntrenamiento::find($id);
+        $bloque = BloqueEntrenamiento::where('id_ciclista', auth()->id())->find($id);
 
         if (!$bloque) {
-            return response()->json(['error' => 'Bloque no encontrado'], 404);
+            return response()->json(['error' => 'No autorizado'], 404);
         }
 
         $bloque->delete();
 
-        return response()->json(['message' => 'Eliminado correctamente']);
+        return response()->json(null, 204);
     }
 }

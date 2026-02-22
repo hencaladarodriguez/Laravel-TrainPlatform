@@ -32,19 +32,19 @@ return new class extends Migration {
             $table->dateTime('fecha');
             $table->time('duracion');
             $table->decimal('kilometros', 6, 2);
-            $table->string('recorrido', 150);
+            $table->string('recorrido', 150) -> nullable();
 
-            $table->integer('pulso_medio')->nullable();
-            $table->integer('pulso_max')->nullable();
-            $table->integer('potencia_media')->nullable();
-            $table->integer('potencia_normalizada');
+            $table->integer('pulso_medio')->nullable()->default(0);
+            $table->integer('pulso_max')->nullable()->default(0);
+            $table->integer('potencia_media')->nullable()->default(0);
+            $table->integer('potencia_normalizada')->nullable()->default(0);
 
-            $table->decimal('velocidad_media', 5, 2);
-            $table->decimal('puntos_estres_tss', 6, 2)->nullable();
-            $table->decimal('factor_intensidad_if', 4, 3)->nullable();
+            $table->decimal('velocidad_media', 5, 2)->default(0.00);
+            $table->decimal('puntos_estres_tss', 6, 2)->nullable()->default(0.00);
+            $table->decimal('factor_intensidad_if', 4, 3)->nullable()->default(0.000);
 
-            $table->integer('ascenso_metros')->nullable();
-            $table->string('comentario')->nullable();
+            $table->integer('ascenso_metros')->nullable()->default(0);
+            $table->string('comentario')->nullable()->default('');
         });
 
     }

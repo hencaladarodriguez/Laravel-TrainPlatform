@@ -10,18 +10,18 @@ class ResultadoController extends Controller
 {
     public function index()
     {
-        $resultados = Entrenamiento::where('id_ciclista', auth()->user()->id)->get();
-        return response()->json($resultados);
+        return response()->json(
+            Entrenamiento::where('id_ciclista', auth()->id())->get()
+        );
     }
 
     public function show($id)
     {
-        $resultado = Entrenamiento::where('id_ciclista', auth()->user()->id)
-            ->with(['ciclista', 'sesion', 'bicicleta'])
+        $resultado = Entrenamiento::where('id_ciclista', auth()->id())
             ->find($id);
 
         if (!$resultado) {
-            return response()->json(['error' => 'No encontrado'], 404);
+            return response()->json(['error' => 'No autorizado'], 404);
         }
 
         return response()->json($resultado);
@@ -47,7 +47,11 @@ class ResultadoController extends Controller
             'comentario' => 'nullable|string',
         ]);
 
-        $validated['id_ciclista'] = auth()->user()->id;
+        $validated['id_ciclista'] = auth()->id();
+
+        if (!isset($validated['recorrido'])) {
+            $validated['recorrido'] = ''; // O cualquier otro valor predeterminado
+        }
 
         $resultado = Entrenamiento::create($validated);
 
@@ -56,8 +60,7 @@ class ResultadoController extends Controller
 
     public function update(Request $request, $id)
     {
-        $resultado = Entrenamiento::where('id_ciclista', auth()->user()->id)
-            ->find($id);
+        $resultado = Entrenamiento::where('id_ciclista', auth()->id())->find($id);
 
         if (!$resultado) {
             return response()->json(['error' => 'No encontrado'], 404);
@@ -85,4 +88,17 @@ class ResultadoController extends Controller
 
         return response()->json($resultado);
     }
+
+    public function destroy($id)
+{
+    $resultado = Entrenamiento::where('id_ciclista', auth()->id())->find($id);
+
+    if (!$resultado) {
+        return response()->json(['error' => 'No autorizado'], 404);
+    }
+
+    $resultado->delete();
+
+    return response()->json(null, 204);
+}
 }

@@ -33,6 +33,7 @@ const FORM_SCHEMAS = {
     ],
     "/api/resultados": [
         "id_sesion",
+        "id_bicicleta",
         "fecha",
         "duracion",
         "kilometros",

@@ -19,15 +19,16 @@ class SesionBloqueController extends Controller
 
     public function show($id)
     {
-        $sesionBloque = SesionBloque::find($id);
+        $sesionBloque = SesionBloque::where('id_ciclista', auth()->id())
+            ->find($id);
 
         if (!$sesionBloque) {
-            return response()->json(['error' => 'No encontrado'], 404);
+            return response()->json(['error' => 'No autorizado'], 404);
         }
 
         return response()->json($sesionBloque);
     }
-
+    
     public function store(Request $request)
     {
         $validated = $request->validate([

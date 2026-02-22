@@ -9,6 +9,7 @@ class Bicicleta extends Model
     protected $table = 'bicicleta';
 
     protected $fillable = [
+        'id_ciclista',
         'nombre',
         'tipo',
         'comentario'
