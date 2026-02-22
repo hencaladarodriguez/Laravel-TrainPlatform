@@ -10,14 +10,13 @@ class PlanEntrenamientoController extends Controller
 {
     public function index()
     {
-        return response()->json(
-            PlanEntrenamiento::with('ciclista')->get()
-        );
+        $planes = PlanEntrenamiento::where('id_ciclista', auth()->user()->id)->get();
+        return response()->json($planes);
     }
-
+    
     public function show($id)
     {
-        $plan = PlanEntrenamiento::with('ciclista')->find($id);
+        $plan = PlanEntrenamiento::where('id_ciclista', auth()->user()->id)->find($id);
 
         if (!$plan) {
             return response()->json(['error' => 'No encontrado'], 404);
@@ -38,7 +37,7 @@ class PlanEntrenamientoController extends Controller
             'activo' => 'required'
         ]);
 
-        $validated['activo'] = filter_var($request->activo, FILTER_VALIDATE_BOOLEAN);
+        $validated['id_ciclista'] = auth()->user()->id;
 
         $plan = PlanEntrenamiento::create($validated);
 
@@ -47,14 +46,13 @@ class PlanEntrenamientoController extends Controller
 
     public function update(Request $request, $id)
     {
-        $plan = PlanEntrenamiento::find($id);
+        $plan = PlanEntrenamiento::where('id_ciclista', auth()->user()->id)->find($id);
 
         if (!$plan) {
             return response()->json(['error' => 'No encontrado'], 404);
         }
 
         $validated = $request->validate([
-            'id_ciclista' => 'required|exists:ciclista,id',
             'nombre' => 'required|string|max:255',
             'descripcion' => 'nullable|string',
             'fecha_inicio' => 'required|date',
@@ -63,8 +61,6 @@ class PlanEntrenamientoController extends Controller
             'activo' => 'required'
         ]);
 
-        $validated['activo'] = filter_var($request->activo, FILTER_VALIDATE_BOOLEAN);
-
         $plan->update($validated);
 
         return response()->json($plan);
@@ -72,7 +68,7 @@ class PlanEntrenamientoController extends Controller
 
     public function destroy($id)
     {
-        $plan = PlanEntrenamiento::find($id);
+        $plan = PlanEntrenamiento::where('id_ciclista', auth()->user()->id)->find($id);
 
         if (!$plan) {
             return response()->json(['error' => 'No encontrado'], 404);

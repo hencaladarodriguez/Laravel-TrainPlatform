@@ -10,14 +10,15 @@ class ResultadoController extends Controller
 {
     public function index()
     {
-        return response()->json(
-            Entrenamiento::with(['ciclista','sesion','bicicleta'])->get()
-        );
+        $resultados = Entrenamiento::where('id_ciclista', auth()->user()->id)->get();
+        return response()->json($resultados);
     }
 
     public function show($id)
     {
-        $resultado = Entrenamiento::with(['ciclista','sesion','bicicleta'])->find($id);
+        $resultado = Entrenamiento::where('id_ciclista', auth()->user()->id)
+            ->with(['ciclista', 'sesion', 'bicicleta'])
+            ->find($id);
 
         if (!$resultado) {
             return response()->json(['error' => 'No encontrado'], 404);
@@ -29,7 +30,6 @@ class ResultadoController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'id_ciclista' => 'required|exists:ciclista,id',
             'id_sesion' => 'required|exists:sesion_entrenamiento,id',
             'id_bicicleta' => 'required|exists:bicicleta,id',
             'fecha' => 'required|date',
@@ -47,6 +47,8 @@ class ResultadoController extends Controller
             'comentario' => 'nullable|string',
         ]);
 
+        $validated['id_ciclista'] = auth()->user()->id;
+
         $resultado = Entrenamiento::create($validated);
 
         return response()->json($resultado, 201);
@@ -54,14 +56,14 @@ class ResultadoController extends Controller
 
     public function update(Request $request, $id)
     {
-        $resultado = Entrenamiento::find($id);
+        $resultado = Entrenamiento::where('id_ciclista', auth()->user()->id)
+            ->find($id);
 
         if (!$resultado) {
             return response()->json(['error' => 'No encontrado'], 404);
         }
 
         $validated = $request->validate([
-            'id_ciclista' => 'required|exists:ciclista,id',
             'id_sesion' => 'required|exists:sesion_entrenamiento,id',
             'id_bicicleta' => 'required|exists:bicicleta,id',
             'fecha' => 'required|date',

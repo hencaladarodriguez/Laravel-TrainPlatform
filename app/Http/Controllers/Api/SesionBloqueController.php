@@ -10,7 +10,11 @@ class SesionBloqueController extends Controller
 {
     public function index()
     {
-        return response()->json(SesionBloque::all());
+        return response()->json(
+            SesionBloque::whereHas('sesion.plan', function ($query) {
+                $query->where('id_ciclista', auth()->id());
+            })->get()
+        );
     }
 
     public function show($id)

@@ -21,7 +21,7 @@ class AuthController extends Controller
         return view('auth.register');
     }
 
-    /* ========= REGISTER ========= */
+    /* ========= REGISTER WEB ========= */
     public function register(Request $request)
     {
         $request->validate([
@@ -48,15 +48,13 @@ class AuthController extends Controller
             ->with('success', 'Usuario creado');
     }
 
-    /* ========= LOGIN ========= */
+    /* ========= LOGIN WEB ========= */
     public function login(Request $request)
     {
         $credentials = $request->only('email', 'password');
 
         if (Auth::attempt($credentials)) {
-
             $request->session()->regenerate();
-
             return redirect()->route('dashboard');
         }
 
@@ -65,14 +63,47 @@ class AuthController extends Controller
         ]);
     }
 
-    /* ========= LOGOUT ========= */
+    /* ========= LOGIN API (TOKEN) ========= */
+    public function loginApi(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email',
+            'password' => 'required'
+        ]);
+
+        $ciclista = Ciclista::where('email', $request->email)->first();
+
+        if (!$ciclista || !Hash::check($request->password, $ciclista->password)) {
+            return response()->json([
+                'message' => 'Credenciales incorrectas'
+            ], 401);
+        }
+
+        $token = $ciclista->createToken('api-token')->plainTextToken;
+
+        return response()->json([
+            'token' => $token,
+            'user' => $ciclista
+        ]);
+    }
+
+    /* ========= LOGOUT WEB ========= */
     public function logout(Request $request)
     {
         Auth::logout();
-
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
         return redirect()->route('login');
+    }
+
+    /* ========= LOGOUT API ========= */
+    public function logoutApi(Request $request)
+    {
+        $request->user()->currentAccessToken()->delete();
+
+        return response()->json([
+            'message' => 'Token eliminado'
+        ]);
     }
 }

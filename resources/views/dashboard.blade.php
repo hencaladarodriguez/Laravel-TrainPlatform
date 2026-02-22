@@ -2,6 +2,9 @@
 
 @section('content')
 
-<p>Bienvenido {{ auth()->user()->nombre }}</p>
+<p id="bienvenida"></p>
+<div id="contenido"></div>
+
+<script src="{{ asset('js/app.js') }}"></script>
 
 @endsection

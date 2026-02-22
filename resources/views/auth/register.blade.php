@@ -11,45 +11,20 @@
     <div class="auth-box">
 
         <h2>Registro</h2>
-        <form method="POST" action="{{ route('register.post') }}">
-            @csrf
-            <label>
-                Nombre
-                <input type="text" name="nombre" placeholder="Nombre" required>
-            </label>
+        <form id="registerForm">
 
-            <label>
-                Apellidos
-                <input type="text" name="apellidos" placeholder="Apellidos">
-            </label>
+            <input type="text" name="nombre" required>
+            <input type="text" name="apellidos">
+            <input type="email" name="email" required>
+            <input type="password" name="password" required>
+            <input type="date" name="fecha_nacimiento" required>
+            <input type="number" step="0.1" name="peso_base" required>
+            <input type="number" name="altura_base" required>
 
-            <label>
-                Email
-                <input type="email" name="email" placeholder="Email" required>
-            </label>
-
-            <label>
-                Contraseña
-                <input type="password" name="password" placeholder="Password" required>
-            </label>
-
-            <label>
-                Fecha de Nacimiento
-                <input type="date" name="fecha_nacimiento" required>
-            </label>
-
-            <label>
-                Peso
-                <input type="number" step="0.1" name="peso_base" placeholder="Peso" required>
-            </label>
-
-            <label>
-                Altura (Ejemplo: 170)
-                <input type="number" name="altura_base" placeholder="Altura" required>
-            </label>
-            
             <button type="submit">Crear cuenta</button>
         </form>
+
+        <script src="{{ asset('js/app.js') }}"></script>
 
     </div>
 

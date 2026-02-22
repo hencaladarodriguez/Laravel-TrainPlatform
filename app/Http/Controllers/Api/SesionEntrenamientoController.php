@@ -4,20 +4,25 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\SesionEntrenamiento;
+use App\Models\PlanEntrenamiento;
 use Illuminate\Http\Request;
 
 class SesionEntrenamientoController extends Controller
 {
-    public function index()
-    {
-        return response()->json(
-            SesionEntrenamiento::with('plan')->get()
-        );
-    }
+public function index()
+{
+    $sesiones = SesionEntrenamiento::whereHas('plan', function ($query) {
+        $query->where('id_ciclista', auth()->id());
+    })->get();
+
+    return response()->json($sesiones);
+}
 
     public function show($id)
     {
-        $sesion = SesionEntrenamiento::with('plan')->find($id);
+        $sesion = SesionEntrenamiento::whereHas('plan', function ($query) {
+            $query->where('id_ciclista', auth()->user()->id);
+        })->find($id);
 
         if (!$sesion) {
             return response()->json(['error' => 'No encontrada'], 404);
@@ -36,8 +41,12 @@ class SesionEntrenamientoController extends Controller
             'completada' => 'required'
         ]);
 
-        $validated['completada'] = filter_var($request->completada, FILTER_VALIDATE_BOOLEAN);
+        $plan = PlanEntrenamiento::findOrFail($validated['id_plan']);
+        if ($plan->id_ciclista !== auth()->user()->id) {
+            return response()->json(['error' => 'No autorizado'], 403);
+        }
 
+        $validated['completada'] = filter_var($request->completada, FILTER_VALIDATE_BOOLEAN);
         $sesion = SesionEntrenamiento::create($validated);
 
         return response()->json($sesion, 201);
@@ -45,10 +54,11 @@ class SesionEntrenamientoController extends Controller
 
     public function update(Request $request, $id)
     {
-        $sesion = SesionEntrenamiento::find($id);
-
+$sesion = SesionEntrenamiento::whereHas('plan', function ($query) {
+    $query->where('id_ciclista', auth()->id());
+})->find($id);
         if (!$sesion) {
-            return response()->json(['error' => 'No encontrada'], 404);
+            return response()->json(['error' => 'No encontrada o no autorizado'], 404);
         }
 
         $validated = $request->validate([

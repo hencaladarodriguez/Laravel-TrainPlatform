@@ -1,6 +1,4 @@
-// Configuración de los campos por modelo para cada endpoint
-const camposPorModelo = {
-    "/api/sesiones": ["nombre", "fecha", "id_plan", "completada"],
+const FORM_SCHEMAS = {
     "/api/planes": [
         "nombre",
         "descripcion",
@@ -8,25 +6,13 @@ const camposPorModelo = {
         "fecha_fin",
         "objetivo",
         "activo",
-        "id_ciclista",
     ],
-    "/api/resultados": [
+    "/api/sesiones": [
+        "id_plan",
         "fecha",
-        "duracion",
-        "kilometros",
-        "recorrido",
-        "pulso_medio",
-        "pulso_max",
-        "potencia_media",
-        "potencia_normalizada",
-        "velocidad_media",
-        "puntos_estres_tss",
-        "factor_intensidad_if",
-        "ascenso_metros",
-        "comentario",
-        "id_ciclista",
-        "id_sesion",
-        "id_bicicleta",
+        "nombre",
+        "descripcion",
+        "completada",
     ],
     "/api/bloques": [
         "nombre",
@@ -45,182 +31,235 @@ const camposPorModelo = {
         "orden",
         "repeticiones",
     ],
+    "/api/resultados": [
+        "id_sesion",
+        "fecha",
+        "duracion",
+        "kilometros",
+        "comentario",
+    ],
 };
 
-// ===================== INICIO =====================
+// ===================== CONFIG =====================
 
-window.addEventListener("DOMContentLoaded", () => {
+const API_BASE = "http://localhost:8000";
+
+// ===================== TOKEN =====================
+
+function setToken(token) {
+    localStorage.setItem("token", token);
+}
+
+function getToken() {
+    return localStorage.getItem("token");
+}
+
+function removeToken() {
+    localStorage.removeItem("token");
+}
+
+// ===================== FETCH CENTRAL =====================
+
+function apiFetch(url, options = {}) {
+    const token = getToken();
+
+    if (!token) {
+        window.location.href = "/";
+        return;
+    }
+
+    return fetch(API_BASE + url, {
+        ...options,
+        headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            Authorization: "Bearer " + token,
+            ...(options.headers || {}),
+        },
+    }).then(async (res) => {
+        if (res.status === 401) {
+            removeToken();
+            alert("Sesión expirada");
+            window.location.href = "/";
+            throw new Error("401");
+        }
+
+        if (!res.ok) {
+            throw new Error("Error servidor " + res.status);
+        }
+
+        if (res.status === 204) return null;
+
+        return res.json();
+    });
+}
+
+// ===================== LOGIN =====================
+
+function initLogin() {
+    const form = document.querySelector("#loginForm");
+    if (!form) return;
+
+    form.addEventListener("submit", function (e) {
+        e.preventDefault();
+
+        const email = form.email.value;
+        const password = form.password.value;
+
+        fetch(API_BASE + "/api/login", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Accept: "application/json",
+            },
+            body: JSON.stringify({ email, password }),
+        })
+            .then((res) => {
+                if (!res.ok) throw new Error("Credenciales incorrectas");
+                return res.json();
+            })
+            .then((data) => {
+                setToken(data.token);
+                window.location.href = "/dashboard";
+            })
+            .catch((err) => {
+                alert("Login incorrecto");
+                console.error(err);
+            });
+    });
+}
+
+// ===================== DASHBOARD =====================
+
+function initDashboard() {
+    if (!document.getElementById("contenido")) return;
+
+    if (!getToken()) {
+        window.location.href = "/";
+        return;
+    }
+
+    // Cargar usuario
+    apiFetch("/api/user").then((user) => {
+        const bienvenida = document.getElementById("bienvenida");
+        if (bienvenida) {
+            bienvenida.textContent = "Bienvenido " + user.nombre;
+        }
+    });
+
+    // Navegación lateral
     document.querySelectorAll(".nav-links a").forEach((link) => {
         link.addEventListener("click", (e) => {
             e.preventDefault();
             cargarSeccion(link.dataset.api);
         });
     });
-});
+}
 
-// ===================== CARGA =====================
+// ===================== CARGAR SECCIÓN =====================
 
 function cargarSeccion(url) {
     const contenido = document.getElementById("contenido");
-    
-    console.log("Cargando sección de URL: ", url);
 
-    fetch(url, {
-        headers: {
-            Accept: "application/json",
-            "X-Requested-With": "XMLHttpRequest",
-        },
-    })
-        .then((res) => {
-            console.log("Respuesta obtenida: ", res);
-            if (!res.ok) throw new Error();
-            return res.json();
-        })
+    apiFetch(url)
         .then((data) => {
-            console.log("Datos recibidos: ", data);
-            
             contenido.innerHTML = "";
 
-            if (!Array.isArray(data) || !data.length) {
-                contenido.innerHTML = "<p>No hay datos disponibles.</p>";
+            if (!Array.isArray(data) || data.length === 0) {
+                const mensaje = document.createElement("p");
+                mensaje.textContent = "No tienes datos todavía.";
+
+                const btn = document.createElement("button");
+                btn.textContent = "Añadir nuevo";
+                btn.onclick = () => mostrarFormulario(url);
+
+                contenido.appendChild(mensaje);
+                contenido.appendChild(btn);
                 return;
             }
 
-            if (url.includes("resultados")) renderResultados(data, url);
-            else if (url.includes("planes")) renderPlanes(data, url);
-            else if (url.includes("sesion-bloques")) renderSesionBloques(data, url);
-            else if (url.includes("sesiones")) renderSesiones(data, url);
-            else if (url.includes("bloques")) renderBloques(data, url);
+            renderTabla(data, url);
         })
-        .catch(() => {
-            contenido.innerHTML = "<p>Error al cargar los datos.</p>";
+        .catch((err) => {
+            console.error(err);
+            contenido.innerHTML = "Error cargando datos";
         });
 }
 
-// ===================== RENDERS =====================
+// ===================== RENDER TABLA =====================
 
-function renderBloques(data, apiUrl) {
-    const headers = [
-        "ID",
-        "Nombre",
-        "Tipo",
-        "Duración",
-        "Potencia Min",
-        "Potencia Max",
-    ];
-    const table = crearTabla(headers);
+function renderTabla(data, apiUrl) {
+    const contenido = document.getElementById("contenido");
 
-    data.forEach((b) => {
-        agregarFila(
-            table,
-            [
-                b.id,
-                b.nombre,
-                b.tipo,
-                b.duracion_estimada,
-                b.potencia_pct_min,
-                b.potencia_pct_max,
-            ],
-            b.id,
-            apiUrl,
-        );
+    const table = document.createElement("table");
+    const thead = document.createElement("thead");
+    const tbody = document.createElement("tbody");
+
+    const headers = Object.keys(data[0]);
+
+    const trHead = document.createElement("tr");
+
+    headers.forEach((key) => {
+        const th = document.createElement("th");
+        th.textContent = key;
+        trHead.appendChild(th);
     });
 
-    mostrarTabla(table, apiUrl);
-}
+    const thAcciones = document.createElement("th");
+    thAcciones.textContent = "Acciones";
+    trHead.appendChild(thAcciones);
 
-function renderSesionBloques(data, apiUrl) {
-    const headers = ["ID Sesión", "ID Bloque", "Orden", "Repeticiones"];
-    const table = crearTabla(headers);
+    thead.appendChild(trHead);
+    table.appendChild(thead);
 
-    data.forEach((sb) => {
-        agregarFila(
-            table,
-            [
-                sb.id_sesion_entrenamiento,
-                sb.id_bloque_entrenamiento,
-                sb.orden,
-                sb.repeticiones,
-            ],
-            sb.id_sesion_entrenamiento,
-            apiUrl,
-        );
+    data.forEach((item) => {
+        const tr = document.createElement("tr");
+
+        headers.forEach((key) => {
+            const td = document.createElement("td");
+            td.textContent = item[key];
+            tr.appendChild(td);
+        });
+
+        const tdAcciones = document.createElement("td");
+
+        const btnEditar = document.createElement("button");
+        btnEditar.textContent = "Editar";
+        btnEditar.onclick = () => mostrarFormulario(apiUrl, item);
+
+        const btnEliminar = document.createElement("button");
+        btnEliminar.textContent = "Eliminar";
+        btnEliminar.onclick = () => eliminarRegistro(apiUrl, item.id);
+
+        tdAcciones.appendChild(btnEditar);
+        tdAcciones.appendChild(btnEliminar);
+
+        tr.appendChild(tdAcciones);
+        tbody.appendChild(tr);
     });
 
-    mostrarTabla(table, apiUrl);
+    table.appendChild(tbody);
+    contenido.appendChild(table);
+
+    const btnCrear = document.createElement("button");
+    btnCrear.textContent = "Añadir nuevo";
+    btnCrear.onclick = () => mostrarFormulario(apiUrl);
+
+    contenido.appendChild(btnCrear);
 }
 
-function renderSesiones(data, apiUrl) {
-    const headers = ["ID", "Nombre", "Fecha", "ID Plan", "Completada"];
-    const table = crearTabla(headers);
+// ===================== FORMULARIO =====================
 
-    data.forEach((s) => {
-        agregarFila(
-            table,
-            [s.id, s.nombre, s.fecha, s.id_plan, s.completada],
-            s.id,
-            apiUrl,
-        );
-    });
-
-    mostrarTabla(table, apiUrl);
-}
-
-function renderPlanes(data, apiUrl) {
-    const headers = ["ID", "Nombre", "Descripción", "Fecha Inicio", "Fecha Fin"];
-    const table = crearTabla(headers);
-
-    data.forEach((p) => {
-        agregarFila(
-            table,
-            [p.id, p.nombre, p.descripcion, p.fecha_inicio, p.fecha_fin],
-            p.id,
-            apiUrl,
-        );
-    });
-
-    mostrarTabla(table, apiUrl);
-}
-
-function renderResultados(data, apiUrl) {
-    const headers = [
-        "Fecha", "Duración", "Kilómetros", "Recorrido", "Pulso Medio", "Comentario"
-    ];
-    const table = crearTabla(headers);
-
-    data.forEach((r) => {
-        agregarFila(
-            table,
-            [r.fecha, r.duracion, r.kilometros, r.recorrido, r.pulso_medio, r.comentario],
-            r.id,
-            apiUrl,
-        );
-    });
-
-    mostrarTabla(table, apiUrl);
-}
-
-// ===================== CRUD =====================
-
-function mostrarFormularioCrear(apiUrl) {
-    pintarFormulario({}, apiUrl, null); // Mostrar el formulario vacío para crear un nuevo registro
-}
-
-function pintarFormulario(data, apiUrl, id = null) {
+function mostrarFormulario(apiUrl, data = null) {
     const contenido = document.getElementById("contenido");
     contenido.innerHTML = "";
 
     const form = document.createElement("form");
 
-    const endpoint = Object.keys(camposPorModelo).find((key) =>
-        apiUrl.includes(key),
-    );
-
-    const campos = camposPorModelo[endpoint];
+    const campos = FORM_SCHEMAS[apiUrl];
 
     if (!campos) {
-        console.error("No hay configuración para:", apiUrl);
-        alert("Modelo no configurado en camposPorModelo");
+        alert("Formulario no definido para esta sección");
         return;
     }
 
@@ -231,129 +270,84 @@ function pintarFormulario(data, apiUrl, id = null) {
         const input = document.createElement("input");
         input.name = key;
 
-        // Lógica para campos especiales (fecha, checkbox, select, etc.)
-        if (key === "completada" || key === "activo") {
-            input.type = "checkbox";
-            input.checked = data[key] == 1;
-        } else {
-            input.type = "text";
+        if (data && data[key] !== undefined) {
+            input.value = data[key];
         }
 
-        input.value = data[key] ?? "";
-        form.append(label, input);
+        form.appendChild(label);
+        form.appendChild(input);
     });
 
     const btn = document.createElement("button");
-    btn.textContent = id ? "Actualizar" : "Crear"; // "Actualizar" si es edición, "Crear" si es nuevo
+    btn.textContent = data ? "Actualizar" : "Crear";
     btn.type = "submit";
     form.appendChild(btn);
 
-    form.onsubmit = (e) => {
+    form.onsubmit = function (e) {
         e.preventDefault();
 
         const formData = new FormData(form);
         const objeto = {};
 
         formData.forEach((value, key) => {
-            const input = form.querySelector(`[name="${key}"]`);
-            if (input.type === "checkbox") {
-                objeto[key] = input.checked ? 1 : 0;
+            // Convertir booleanos
+            if (key === "activo" || key === "completada") {
+                objeto[key] = value === "true" || value === "1";
+            }
+
+            // Convertir números
+            else if (!isNaN(value) && value !== "") {
+                objeto[key] = Number(value);
             } else {
                 objeto[key] = value;
             }
         });
 
-        // Aquí hacemos el POST para añadir el nuevo elemento
-        fetch(id ? `${apiUrl}/${id}` : apiUrl, {
-            method: id ? "PUT" : "POST",  // PUT si es actualización, POST si es nuevo
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(objeto),
-        })
-            .then(async (res) => {
-                const text = await res.text();
+        const options = {
+            method: "POST",
+            body: JSON.stringify(data ? { ...objeto, _method: "PUT" } : objeto),
+        };
 
-                if (!res.ok) {
-                    console.error("ERROR BACKEND:", text);
-                    throw new Error(text);
-                }
-
-                return JSON.parse(text);
-            })
-            .then(() => cargarSeccion(apiUrl)) // Recargar la sección después de la acción
-            .catch(async (error) => {
-                console.error(error);
-                alert("Error al guardar. Mira la consola.");
+        apiFetch(data ? `${apiUrl}/${data.id}` : apiUrl, options)
+            .then(() => cargarSeccion(apiUrl))
+            .catch((err) => {
+                console.error(err);
+                alert("Error guardando (revisa consola)");
             });
     };
 
     contenido.appendChild(form);
 }
 
-function mostrarTabla(table, apiUrl) {
-    const contenido = document.getElementById("contenido");
-    contenido.appendChild(table);
+// ===================== ELIMINAR =====================
 
-    const btnCrear = document.createElement("button");
-    btnCrear.textContent = "Crear Nuevo";
-    btnCrear.onclick = () => mostrarFormularioCrear(apiUrl);
-    contenido.appendChild(btnCrear);
+function eliminarRegistro(apiUrl, id) {
+    if (!confirm("¿Seguro que quieres eliminar?")) return;
+
+    apiFetch(`${apiUrl}/${id}`, {
+        method: "DELETE",
+    })
+        .then(() => cargarSeccion(apiUrl))
+        .catch((err) => {
+            console.error(err);
+            alert("Error eliminando");
+        });
 }
 
-// ===================== TABLA =====================
+// ===================== LOGOUT =====================
 
-function crearTabla(headers) {
-    const table = document.createElement("table");
-    const thead = document.createElement("thead");
-    const tr = document.createElement("tr");
-
-    headers.forEach((header) => {
-        const th = document.createElement("th");
-        th.textContent = header;
-        tr.appendChild(th);
+function logout() {
+    apiFetch("/api/logout", { method: "POST" }).finally(() => {
+        removeToken();
+        window.location.href = "/";
     });
-
-    thead.appendChild(tr);
-    table.appendChild(thead);
-    table.appendChild(document.createElement("tbody"));
-    return table;
 }
 
-function agregarFila(table, rowData, id, apiUrl) {
-    const tbody = table.querySelector("tbody");
-    const tr = document.createElement("tr");
+// ===================== INIT GLOBAL =====================
 
-    rowData.forEach((data) => {
-        const td = document.createElement("td");
-        td.textContent = data;
-        tr.appendChild(td);
-    });
+document.addEventListener("DOMContentLoaded", function () {
+    initLogin();
+    initDashboard();
+});
 
-    // Opcional: Agregar botones para editar o eliminar
-    const tdAcciones = document.createElement("td");
-    const btnEditar = document.createElement("button");
-    btnEditar.textContent = "Editar";
-    btnEditar.onclick = () => {
-        pintarFormulario(rowData, apiUrl, id);
-    };
-    tdAcciones.appendChild(btnEditar);
-
-    const btnEliminar = document.createElement("button");
-    btnEliminar.textContent = "Eliminar";
-    btnEliminar.onclick = () => {
-        eliminarElemento(id, apiUrl);
-    };
-    tdAcciones.appendChild(btnEliminar);
-
-    tr.appendChild(tdAcciones);
-    tbody.appendChild(tr);
-}
-
-function eliminarElemento(id, apiUrl) {
-    if (confirm("¿Estás seguro de que deseas eliminar este registro?")) {
-        fetch(`${apiUrl}/${id}`, {
-            method: "DELETE",
-        })
-            .then(() => cargarSeccion(apiUrl))
-            .catch(() => alert("Error al eliminar el registro"));
-    }
-}
+console.log("JS cargado correctamente");

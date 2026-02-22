@@ -10,7 +10,13 @@ class BloqueEntrenamientoController extends Controller
 {
     public function index()
     {
-        return response()->json(BloqueEntrenamiento::all());
+        $ciclistaId = auth()->id();
+
+        $bloques = BloqueEntrenamiento::whereHas('sesiones.plan', function ($query) use ($ciclistaId) {
+            $query->where('id_ciclista', $ciclistaId);
+        })->get();
+
+        return response()->json($bloques);
     }
 
     public function show($id)
@@ -37,6 +43,8 @@ class BloqueEntrenamientoController extends Controller
             'pulso_reserva_pct' => 'nullable|numeric',
             'comentario' => 'nullable|string',
         ]);
+
+        $validated['id_ciclista'] = auth()->user()->id;
 
         $bloque = BloqueEntrenamiento::create($validated);
 
