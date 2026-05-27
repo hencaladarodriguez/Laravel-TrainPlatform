@@ -19,16 +19,17 @@
                 <li><a href="#" data-api="/api/resultados">Resultados</a></li>
             </ul>
 
-            <form method="POST" action="{{ route('logout') }}">
-                @csrf
-                <button type="submit">Logout</button>
-            </form>
+            <button type="button" onclick="logout()">Logout</button>
         </div>
     </nav>
+
+    <p id="bienvenida"></p>
 
     <div class="container" id="contenido">
         <p>Selecciona una sección del menú para ver los datos.</p>
     </div>
+
+    @yield('content')
 
     <script src="{{ asset('js/app.js') }}"></script>
 </body>
