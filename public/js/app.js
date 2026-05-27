@@ -41,7 +41,7 @@ const FORM_SCHEMAS = {
     ],
 };
 
-const API_BASE = "http://localhost:8000";
+const API_BASE = "";
 
 // Token
 function setToken(token) {
@@ -147,14 +147,20 @@ function initRegister() {
             },
             body: JSON.stringify(formObject),
         })
-            .then((res) => res.json())
-            .then((data) => {
+            .then(async (res) => {
+                const data = await res.json();
+                if (!res.ok) {
+                    if (res.status === 422 && data.errors) {
+                        const mensajes = Object.values(data.errors).flat().join("\n");
+                        alert("Errores de validación:\n" + mensajes);
+                    } else {
+                        alert(data.message || "Error al crear la cuenta.");
+                    }
+                    return;
+                }
                 if (data.success) {
-                    alert(data.message); // Muestra el mensaje de éxito
-                    // Redirigir a la página de login
+                    alert(data.message);
                     window.location.href = data.redirect_to;
-                } else {
-                    alert("Hubo un error al crear la cuenta. Intenta nuevamente.");
                 }
             })
             .catch((err) => {
@@ -335,8 +341,8 @@ function mostrarFormulario(apiUrl, data = null) {
         });
 
         const options = {
-            method: "POST",
-            body: JSON.stringify(data ? { ...objeto, _method: "PUT" } : objeto),
+            method: data ? "PUT" : "POST",
+            body: JSON.stringify(objeto),
         };
 
         apiFetch(data ? `${apiUrl}/${data.id}` : apiUrl, options)
