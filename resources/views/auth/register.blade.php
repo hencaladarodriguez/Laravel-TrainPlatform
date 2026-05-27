@@ -16,11 +16,11 @@
             <p>Nombre</p>
             <input type="text" name="nombre" required>
             <p>Apellido</p>
-            <input type="text" name="apellidos">
+            <input type="text" name="apellidos" required>
             <p>Email</p>
             <input type="email" name="email" required>
-            <p>Contraseña</p>
-            <input type="password" name="password" required>
+            <p>Contraseña <small>(mínimo 8 caracteres)</small></p>
+            <input type="password" name="password" required minlength="8">
             <p>Fecha de Nacimiento</p>
             <input type="date" name="fecha_nacimiento" required>
             <p>Peso Base</p>

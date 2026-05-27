@@ -4,6 +4,8 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\SesionBloque;
+use App\Models\SesionEntrenamiento;
+use App\Models\BloqueEntrenamiento;
 
 class SesionBloqueSeeder extends Seeder
 {
@@ -11,18 +13,18 @@ class SesionBloqueSeeder extends Seeder
     {
         SesionBloque::query()->delete();
 
-        SesionBloque::create([
-            'id_sesion_entrenamiento' => 1,
-            'id_bloque_entrenamiento' => 1,
-            'orden' => 1,
-            'repeticiones' => 1
-        ]);
+        $sesion  = SesionEntrenamiento::first();
+        $bloques = BloqueEntrenamiento::take(2)->get();
 
-        SesionBloque::create([
-            'id_sesion_entrenamiento' => 1,
-            'id_bloque_entrenamiento' => 2,
-            'orden' => 2,
-            'repeticiones' => 1
-        ]);
+        if (!$sesion || $bloques->isEmpty()) return;
+
+        foreach ($bloques as $orden => $bloque) {
+            SesionBloque::create([
+                'id_sesion_entrenamiento' => $sesion->id,
+                'id_bloque_entrenamiento' => $bloque->id,
+                'orden'                   => $orden + 1,
+                'repeticiones'            => 1
+            ]);
+        }
     }
 }
