@@ -20,7 +20,7 @@ class CiclistaSeeder extends Seeder
             'peso_base' => 70.5,
             'altura_base' => 175,
             'email' => 'test1@prueba.com',
-            'password' => Hash::make('prueba')
+            'password' => Hash::make('prueba123')
         ]);
 
         Ciclista::create([
@@ -30,7 +30,7 @@ class CiclistaSeeder extends Seeder
             'peso_base' => 60.0,
             'altura_base' => 165,
             'email' => 'test2@prueba.com',
-            'password' => Hash::make('prueba')
+            'password' => Hash::make('prueba123')
         ]);
     }
 }

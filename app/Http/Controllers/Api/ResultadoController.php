@@ -49,10 +49,6 @@ class ResultadoController extends Controller
 
         $validated['id_ciclista'] = auth()->id();
 
-        if (!isset($validated['recorrido'])) {
-            $validated['recorrido'] = ''; // O cualquier otro valor predeterminado
-        }
-
         $resultado = Entrenamiento::create($validated);
 
         return response()->json($resultado, 201);
