@@ -28,7 +28,7 @@ class AuthController extends Controller
             'peso_base' => 'required|numeric',
             'altura_base' => 'required|numeric',
             'email' => 'required|email|unique:ciclista,email',
-            'password' => 'required|min:4'
+            'password' => 'required|min:8'
         ]);
 
         $ciclista = Ciclista::create([

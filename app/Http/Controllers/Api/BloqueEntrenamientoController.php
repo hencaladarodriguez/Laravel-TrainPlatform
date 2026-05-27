@@ -32,7 +32,7 @@ class BloqueEntrenamientoController extends Controller
         $validated = $request->validate([
             'nombre' => 'required|string|max:255',
             'descripcion' => 'nullable|string',
-            'tipo' => 'required|string|max:100',
+            'tipo' => 'required|in:rodaje,intervalos,fuerza,recuperacion,test',
             'duracion_estimada' => 'nullable|string',
             'potencia_pct_min' => 'nullable|numeric',
             'potencia_pct_max' => 'nullable|numeric',
@@ -59,7 +59,7 @@ class BloqueEntrenamientoController extends Controller
         $validated = $request->validate([
             'nombre' => 'required|string|max:255',
             'descripcion' => 'nullable|string',
-            'tipo' => 'required|string|max:100',
+            'tipo' => 'required|in:rodaje,intervalos,fuerza,recuperacion,test',
             'duracion_estimada' => 'nullable|string',
             'potencia_pct_min' => 'nullable|numeric',
             'potencia_pct_max' => 'nullable|numeric',
