@@ -19,8 +19,9 @@ class SesionBloqueController extends Controller
 
     public function show($id)
     {
-        $sesionBloque = SesionBloque::where('id_ciclista', auth()->id())
-            ->find($id);
+        $sesionBloque = SesionBloque::whereHas('sesion.plan', function ($query) {
+            $query->where('id_ciclista', auth()->id());
+        })->find($id);
 
         if (!$sesionBloque) {
             return response()->json(['error' => 'No autorizado'], 404);
@@ -28,7 +29,7 @@ class SesionBloqueController extends Controller
 
         return response()->json($sesionBloque);
     }
-    
+
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -38,6 +39,19 @@ class SesionBloqueController extends Controller
             'repeticiones' => 'nullable|integer',
         ]);
 
+        $sesion = \App\Models\SesionEntrenamiento::whereHas('plan', function ($q) {
+            $q->where('id_ciclista', auth()->id());
+        })->find($validated['id_sesion_entrenamiento']);
+        if (!$sesion) {
+            return response()->json(['error' => 'Sesión no autorizada'], 403);
+        }
+
+        $bloque = \App\Models\BloqueEntrenamiento::where('id_ciclista', auth()->id())
+            ->find($validated['id_bloque_entrenamiento']);
+        if (!$bloque) {
+            return response()->json(['error' => 'Bloque no autorizado'], 403);
+        }
+
         $sesionBloque = SesionBloque::create($validated);
 
         return response()->json($sesionBloque, 201);
@@ -45,10 +59,12 @@ class SesionBloqueController extends Controller
 
     public function update(Request $request, $id)
     {
-        $sesionBloque = SesionBloque::find($id);
+        $sesionBloque = SesionBloque::whereHas('sesion.plan', function ($query) {
+            $query->where('id_ciclista', auth()->id());
+        })->find($id);
 
         if (!$sesionBloque) {
-            return response()->json(['error' => 'No encontrado'], 404);
+            return response()->json(['error' => 'No autorizado'], 404);
         }
 
         $validated = $request->validate([
@@ -65,14 +81,16 @@ class SesionBloqueController extends Controller
 
     public function destroy($id)
     {
-        $sesionBloque = SesionBloque::find($id);
+        $sesionBloque = SesionBloque::whereHas('sesion.plan', function ($query) {
+            $query->where('id_ciclista', auth()->id());
+        })->find($id);
 
         if (!$sesionBloque) {
-            return response()->json(['error' => 'No encontrado'], 404);
+            return response()->json(['error' => 'No autorizado'], 404);
         }
 
         $sesionBloque->delete();
 
-        return response()->json(['message' => 'Eliminado']);
+        return response()->json(null, 204);
     }
 }

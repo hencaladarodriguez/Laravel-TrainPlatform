@@ -22,8 +22,9 @@ class SesionEntrenamientoController extends Controller
 
     public function show($id)
     {
-        $sesion = SesionEntrenamiento::where('id_ciclista', auth()->id())
-                        ->find($id);
+        $sesion = SesionEntrenamiento::whereHas('plan', function ($q) {
+            $q->where('id_ciclista', auth()->id());
+        })->find($id);
 
         if (!$sesion) {
             return response()->json(['error' => 'No autorizado'], 404);
@@ -42,7 +43,10 @@ class SesionEntrenamientoController extends Controller
             'completada' => 'boolean'
         ]);
 
-        $validated['id_ciclista'] = auth()->id();
+        $plan = \App\Models\PlanEntrenamiento::where('id_ciclista', auth()->id())->find($validated['id_plan']);
+        if (!$plan) {
+            return response()->json(['error' => 'Plan no autorizado'], 403);
+        }
 
         $sesion = SesionEntrenamiento::create($validated);
 
@@ -51,7 +55,9 @@ class SesionEntrenamientoController extends Controller
 
    public function update(Request $request, $id)
 {
-    $sesion = SesionEntrenamiento::where('id_ciclista', auth()->id())->find($id);
+    $sesion = SesionEntrenamiento::whereHas('plan', function ($q) {
+        $q->where('id_ciclista', auth()->id());
+    })->find($id);
 
     if (!$sesion) {
         return response()->json(['error' => 'No autorizado'], 404);
@@ -72,7 +78,9 @@ class SesionEntrenamientoController extends Controller
 
     public function destroy($id)
     {
-        $sesion = SesionEntrenamiento::where('id_ciclista', auth()->id())->find($id);
+        $sesion = SesionEntrenamiento::whereHas('plan', function ($q) {
+            $q->where('id_ciclista', auth()->id());
+        })->find($id);
 
         if (!$sesion) {
             return response()->json(['error' => 'No autorizado'], 404);
