@@ -3,64 +3,104 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use App\Models\Ciclista;
-use Illuminate\Support\Facades\Session;
 
 class AuthController extends Controller
 {
-    // Mostrar formulario de login
-    public function form()
+    public function showLogin()
     {
-        return view('login');
+        return view('auth.login');
     }
 
-    // Procesar login
+    public function showRegister()
+    {
+        return view('auth.register');
+    }
+
+    public function register(Request $request)
+    {
+        $request->validate([
+            'nombre' => 'required',
+            'apellidos' => 'required',
+            'fecha_nacimiento' => 'required|date',
+            'peso_base' => 'required|numeric',
+            'altura_base' => 'required|numeric',
+            'email' => 'required|email|unique:ciclista,email',
+            'password' => 'required|min:4'
+        ]);
+
+        $ciclista = Ciclista::create([
+            'nombre' => $request->nombre,
+            'apellidos' => $request->apellidos,
+            'fecha_nacimiento' => $request->fecha_nacimiento,
+            'peso_base' => $request->peso_base,
+            'altura_base' => $request->altura_base,
+            'email' => $request->email,
+            'password' => Hash::make($request->password)
+        ]);
+
+        return response()->json([
+        'success' => true,
+        'message' => 'Usuario creado correctamente. Redirigiendo al login...',
+        'redirect_to' => route('login') 
+        ]);
+
+    }
+
     public function login(Request $request)
+    {
+        $credentials = $request->only('email', 'password');
+
+        if (Auth::attempt($credentials)) {
+            $request->session()->regenerate();
+            return redirect()->route('dashboard');
+        }
+
+        return back()->withErrors([
+            'email' => 'Credenciales incorrectas'
+        ]);
+    }
+
+    public function loginApi(Request $request)
     {
         $request->validate([
             'email' => 'required|email',
             'password' => 'required'
         ]);
 
-        // Login para práctica sin hash
-        $ciclista = Ciclista::where('email', $request->email)
-            ->where('password', $request->password)
-            ->first();
+        $ciclista = Ciclista::where('email', $request->email)->first();
 
-        if ($ciclista) {
-            Session::put('ciclista_id', $ciclista->id);
-            Session::put('ciclista_nombre', $ciclista->nombre);
-            Session::put('ciclista_email', $ciclista->email);
-
-            //Usar nombre de ruta en lugar de action()
-            return redirect()->route('dashboard');
+        if (!$ciclista || !Hash::check($request->password, $ciclista->password)) {
+            return response()->json([
+                'message' => 'Credenciales incorrectas'
+            ], 401);
         }
 
-        return back()->with('error', 'Credenciales incorrectas');
-    }
+        $token = $ciclista->createToken('api-token')->plainTextToken;
 
-    // Dashboard protegido
-    public function dashboard()
-    {
-        if (!Session::has('ciclista_id')) {
-            //Usar nombre de ruta
-            return redirect()->route('login')->with('error', 'Debes iniciar sesión');
-        }
-
-        $menuPath = resource_path('json/menus.json');
-        $menus = file_exists($menuPath) ? json_decode(file_get_contents($menuPath), true) : [];
-
-        return view('dashboard', [
-            'nombre' => Session::get('ciclista_nombre'),
-            'menus' => $menus
+        return response()->json([
+            'token' => $token,
+            'user' => $ciclista
         ]);
     }
 
-    // Logout
-    public function logout()
+    public function logout(Request $request)
     {
-        Session::flush();
-        //Usar nombre de ruta
-        return redirect()->route('login')->with('success', 'Sesión cerrada correctamente');
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect()->route('login');
+    }
+
+    public function logoutApi(Request $request)
+    {
+        $request->user()->currentAccessToken()->delete();
+
+        return response()->json([
+            'message' => 'Token eliminado'
+        ]);
     }
 }

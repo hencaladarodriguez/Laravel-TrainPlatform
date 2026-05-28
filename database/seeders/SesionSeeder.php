@@ -7,10 +7,8 @@ use App\Models\SesionEntrenamiento;
 
 class SesionSeeder extends Seeder
 {
-    public function run()
+    public function run(): void
     {
-        SesionEntrenamiento::query()->delete();
-
         SesionEntrenamiento::create([
             'id_plan' => 1,
             'fecha' => '2026-01-03',
@@ -22,9 +20,9 @@ class SesionSeeder extends Seeder
         SesionEntrenamiento::create([
             'id_plan' => 1,
             'fecha' => '2026-01-05',
-            'nombre' => 'Sweet Spot',
-            'descripcion' => 'Intervalos',
-            'completada' => 1
+            'nombre' => 'Series cortas',
+            'descripcion' => 'Trabajo de intensidad',
+            'completada' => 0
         ]);
     }
 }

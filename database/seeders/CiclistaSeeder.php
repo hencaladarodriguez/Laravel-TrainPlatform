@@ -4,12 +4,14 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\Ciclista;
+use Illuminate\Support\Facades\Hash;
 
 class CiclistaSeeder extends Seeder
 {
     public function run()
     {
-        Ciclista::query()->delete(); // Limpiar tabla antes de insertar
+        // Limpiar tabla antes de insertar
+        Ciclista::query()->delete(); 
 
         Ciclista::create([
             'nombre' => 'Juan',
@@ -18,7 +20,7 @@ class CiclistaSeeder extends Seeder
             'peso_base' => 70.5,
             'altura_base' => 175,
             'email' => 'test1@prueba.com',
-            'password' => 'prueba'
+            'password' => Hash::make('prueba')
         ]);
 
         Ciclista::create([
@@ -28,9 +30,7 @@ class CiclistaSeeder extends Seeder
             'peso_base' => 60.0,
             'altura_base' => 165,
             'email' => 'test2@prueba.com',
-            'password' => 'prueba'
+            'password' => Hash::make('prueba')
         ]);
-
-        // ... más ciclistas si quieres
     }
 }
