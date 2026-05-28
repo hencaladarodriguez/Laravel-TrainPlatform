@@ -372,10 +372,9 @@ function eliminarRegistro(apiUrl, id) {
 
 // Logout
 function logout() {
-    apiFetch("/api/logout", { method: "POST" }).finally(() => {
-        removeToken();
-        window.location.href = "/";
-    });
+    const req = apiFetch("/api/logout", { method: "POST" });
+    const done = () => { removeToken(); window.location.href = "/"; };
+    req ? req.finally(done) : done();
 }
 
 // Init Global
