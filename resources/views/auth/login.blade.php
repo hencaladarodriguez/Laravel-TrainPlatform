@@ -6,13 +6,13 @@
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
 </head>
 
+<body class="auth-body">
+
 @if(session('success'))
     <div class="alert alert-success">
         {{ session('success') }}
     </div>
 @endif
-
-<body class="auth-body">
 
     <div class="auth-box">
 
